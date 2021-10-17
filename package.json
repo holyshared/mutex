@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "bunyan": "^1.8.15",
+    "gcs-mutex-lock": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.1",
+    "typescript": "^4.4.4"
+  }
+}
