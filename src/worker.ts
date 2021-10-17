@@ -8,30 +8,36 @@ interface MutexWorker {
 
 const mutex = new MutexLock({
   bucket: process.env.BUCKET,
-  object: process.env.OBJECT
+  object: process.env.OBJECT,
+  timeout: 10000
 })
 
 const createWorker = (action: () => Promise<void>) : MutexWorker => {
   let interval : NodeJS.Timer | null = null
 
   const perform = async () =>  {
+    if (mutex.isLocked) {
+      logger.info(`skip lock pid = ${process.pid}`)
+      return
+    }
+
     logger.info(`try lock pid = ${process.pid}`)
-    const { success, err } = await mutex.acquire()
+    const { success } = await mutex.acquire()
 
     if (!success) {
       logger.info(`lock failed pid = ${process.pid}`)
-      if (err) {
-        logger.error(err)
-      }
       return
     }
+    logger.info(`locked pid = ${process.pid}`)
 
     try {
       await action()
     } catch (err) {
       logger.error(err)
     } finally {
+      logger.info(`lock release pid = ${process.pid}`)
       await mutex.release()
+      logger.info(`lock release done pid = ${process.pid}`)
     }
   }
 
@@ -39,7 +45,9 @@ const createWorker = (action: () => Promise<void>) : MutexWorker => {
     start() {
       logger.info(`start process pid = ${process.pid}`)
       interval = setInterval(() => {
-        perform().then().catch((err) => {
+        perform().then(() => {
+
+        }).catch((err) => {
           logger.error(err)
         })
       }, 10000)
@@ -58,8 +66,10 @@ const shutdown = () => {
   logger.info(`process shutdown pid = ${process.pid}`)
   worker.shutdown().then(() => {
     logger.info(`process shutdown completed pid = ${process.pid}`)
+    process.exit()
   }).catch((err) => {
     logger.error(`process shutdown completed pid = ${process.pid}, ${err.stack}`)
+    process.exit(-1)
   })
 }
 
