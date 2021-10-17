@@ -1,5 +1,6 @@
 import MutexLock from "gcs-mutex-lock"
 import { logger } from "./logger"
+import random from 'random'
 
 interface MutexWorker {
   start(): void
@@ -58,9 +59,6 @@ const createWorker = (action: () => Promise<void>) : MutexWorker => {
     },
     async shutdown() {
       clearInterval(interval)
-      if (!mutex.isLocked) {
-        return
-      }
       await mutex.release()
     }
   }
@@ -77,8 +75,16 @@ const shutdown = () => {
   })
 }
 
+const sleep = async (n: number) => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, n)
+  })
+}
+
 const worker = createWorker(async () => {
-  logger.info(`process pid = ${process.pid}`)
+  logger.info(`start perform pid = ${process.pid}`)
+  await sleep(random.int(5000, 15000))
+  logger.info(`end perform pid = ${process.pid}`)
 })
 
 worker.start()

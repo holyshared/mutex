@@ -5,7 +5,8 @@
   },
   "dependencies": {
     "bunyan": "^1.8.15",
-    "gcs-mutex-lock": "^2.1.0"
+    "gcs-mutex-lock": "^2.1.0",
+    "random": "^3.0.6"
   },
   "devDependencies": {
     "@types/node": "^16.11.1",
