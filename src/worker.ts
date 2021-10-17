@@ -36,8 +36,12 @@ const createWorker = (action: () => Promise<void>) : MutexWorker => {
       logger.error(err)
     } finally {
       logger.info(`lock release pid = ${process.pid}`)
-      await mutex.release()
-      logger.info(`lock release done pid = ${process.pid}`)
+      const { success, err } = await mutex.release()
+      if (success) {
+        logger.info(`lock release done pid = ${process.pid}`)
+      } else {
+        logger.error(`lock release failed pid = ${process.pid} ${err.stack}`)
+      }
     }
   }
 

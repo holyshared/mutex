@@ -39,9 +39,9 @@ resource "google_project_iam_member" "mutex_lock_service_account_user" {
   member  = "serviceAccount:${google_service_account.mutex_lock_service_account.email}"
 }
 
-resource "google_project_iam_member" "mutex_lock_object_creator" {
+resource "google_project_iam_member" "mutex_lock_object_administrator" {
   project = module.project-factory.project_id
-  role    = "roles/storage.objectCreator"
+  role    = "roles/storage.objectAdmin"
   member  = "serviceAccount:${google_service_account.mutex_lock_service_account.email}"
 }
 
