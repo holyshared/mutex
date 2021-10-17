@@ -3,7 +3,7 @@ import { logger } from "./logger"
 
 interface MutexWorker {
   start(): void
-  shutdown(): void
+  shutdown(): Promise<void>
 }
 
 const mutex = new MutexLock({
@@ -37,16 +37,30 @@ const createWorker = (action: () => Promise<void>) : MutexWorker => {
 
   return {
     start() {
+      logger.info(`start process pid = ${process.pid}`)
       interval = setInterval(() => {
         perform().then().catch((err) => {
           logger.error(err)
         })
-      }, 50000)
+      }, 10000)
     },
-    shutdown() {
+    async shutdown() {
       clearInterval(interval)
+      if (!mutex.isLocked) {
+        return
+      }
+      await mutex.release()
     }
   }
+}
+
+const shutdown = () => {
+  logger.info(`process shutdown pid = ${process.pid}`)
+  worker.shutdown().then(() => {
+    logger.info(`process shutdown completed pid = ${process.pid}`)
+  }).catch((err) => {
+    logger.error(`process shutdown completed pid = ${process.pid}, ${err.stack}`)
+  })
 }
 
 const worker = createWorker(async () => {
@@ -55,9 +69,5 @@ const worker = createWorker(async () => {
 
 worker.start()
 
-process.on("SIGINT", () => {
-  worker.shutdown()
-})
-process.on("SIGTERM", () => {
-  worker.shutdown()
-})
+process.on("SIGINT", shutdown)
+process.on("SIGTERM", shutdown)

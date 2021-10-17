@@ -1,5 +1,9 @@
 import { createLogger } from "bunyan"
 
 export const logger = createLogger({
-  streams: [process.stdout]
+  name: "mutex-locks",
+  streams: [{
+    level: 'info',
+    stream: process.stdout
+  }]
 })

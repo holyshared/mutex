@@ -5,8 +5,8 @@ import { logger } from "./logger"
 
 const numCPUs = parseInt(process.env.WEB_CONCURRENCY, 10) || os.cpus().length
 
-cluster.setupPrimary({
-  exec: path.resolve(__dirname, "app.js"),
+cluster.setupMaster({
+  exec: path.resolve(__dirname, "worker.js"),
   silent: false,
 });
 
